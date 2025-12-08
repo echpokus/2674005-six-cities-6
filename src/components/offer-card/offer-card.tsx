@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import type { Offer } from '../../types/offer';
 
@@ -8,7 +8,7 @@ type OfferCardProps = {
   onMouseLeave?: () => void;
 };
 
-function OfferCard({ offer, onMouseEnter, onMouseLeave }: OfferCardProps): JSX.Element {
+function OfferCardComponent({ offer, onMouseEnter, onMouseLeave }: OfferCardProps): JSX.Element {
   return (
     <article
       className="cities__card place-card"
@@ -67,4 +67,5 @@ function OfferCard({ offer, onMouseEnter, onMouseLeave }: OfferCardProps): JSX.E
   );
 }
 
+const OfferCard = memo(OfferCardComponent);
 export default OfferCard;

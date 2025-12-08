@@ -1,28 +1,32 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useParams, Link, Navigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchOfferDetails, fetchNearbyOffers, fetchComments, logout } from '../../store/api-actions';
 import { clearCurrentOffer } from '../../store/action';
 import { AuthorizationStatus } from '../../const';
-import type { RootState, AppDispatch } from '../../store';
+import type { AppDispatch } from '../../store';
 import ReviewForm from '../review-form/review-form';
 import Spinner from '../spinner/spinner';
+import { selectCurrentOffer, selectComments, selectOfferLoading, selectOfferError } from '../../store/selectors/offer-details-selectors';
+import { selectAuthorizationStatus, selectUser } from '../../store/selectors/user-selectors';
+import { selectFavoriteOffers } from '../../store/selectors/offers-selectors';
 
 function OfferPage(): JSX.Element {
   const { id } = useParams();
   const dispatch = useDispatch<AppDispatch>();
   
-  const offer = useSelector((state: RootState) => state.currentOffer);
-  const comments = useSelector((state: RootState) => state.comments);
-  const isOfferLoading = useSelector((state: RootState) => state.isOfferLoading);
-  const hasOfferError = useSelector((state: RootState) => state.hasOfferError);
-  const authorizationStatus = useSelector((state: RootState) => state.authorizationStatus);
-  const user = useSelector((state: RootState) => state.user);
-  const allOffers = useSelector((state: RootState) => state.offers);
+  // Use memoized selectors
+  const offer = useSelector(selectCurrentOffer);
+  const comments = useSelector(selectComments);
+  const isOfferLoading = useSelector(selectOfferLoading);
+  const hasOfferError = useSelector(selectOfferError);
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
+  const user = useSelector(selectUser);
+  const favoriteOffers = useSelector(selectFavoriteOffers);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     dispatch(logout());
-  };
+  }, [dispatch]);
 
   useEffect(() => {
     if (id) {
@@ -76,7 +80,7 @@ function OfferPage(): JSX.Element {
                           )}
                         </div>
                         <span className="header__user-name user__name">{user?.email}</span>
-                        <span className="header__favorite-count">{allOffers.filter((o) => o.isFavorite).length}</span>
+                        <span className="header__favorite-count">{favoriteOffers.length}</span>
                       </Link>
                     </li>
                     <li className="header__nav-item">

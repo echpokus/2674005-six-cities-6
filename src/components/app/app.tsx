@@ -7,11 +7,10 @@ import FavoritesPage from '../favorites-page/favorites-page';
 import OfferPage from '../offer-page/offer-page';
 import NotFoundPage from '../not-found-page/not-found-page';
 import PrivateRoute from '../private-route/private-route';
-import type { RootState } from '../../store';
+import { selectFavoriteOffers } from '../../store/selectors/offers-selectors';
 
 function App(): JSX.Element {
-  const offers = useSelector((state: RootState) => state.offers);
-  const favoriteOffers = offers.filter((offer) => offer.isFavorite);
+  const favoriteOffers = useSelector(selectFavoriteOffers);
 
   return (
     <BrowserRouter>

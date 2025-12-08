@@ -1,29 +1,29 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
 import OffersList from '../offers-list/offers-list';
 import Map from '../map/map';
 import CitiesList from '../cities-list/cities-list';
 import Sorting, { SortType } from '../sorting/sorting';
 import Spinner from '../spinner/spinner';
-import { AuthorizationStatus } from '../../const';
-import type { RootState } from '../../store';
+import HeaderLogo from '../header-logo/header-logo';
+import HeaderNav from '../header-nav/header-nav';
 import { changeCity } from '../../store/action';
+import { selectCity, selectCityOffers, selectOffersLoading, selectFavoriteOffers } from '../../store/selectors/offers-selectors';
+import { selectAuthorizationStatus, selectUser } from '../../store/selectors/user-selectors';
+import type { AppDispatch } from '../../store';
 
 function MainPage(): JSX.Element {
   const [activeOfferId, setActiveOfferId] = useState<string | null>(null);
   const [currentSort, setCurrentSort] = useState<SortType>(SortType.Popular);
-  const dispatch = useDispatch();
-  const currentCity = useSelector((state: RootState) => state.city);
-  const allOffers = useSelector((state: RootState) => state.offers);
-  const isLoading = useSelector((state: RootState) => state.isLoading);
-  const authorizationStatus = useSelector((state: RootState) => state.authorizationStatus);
-  const user = useSelector((state: RootState) => state.user);
-
-  const cityOffers = useMemo(
-    () => allOffers.filter((offer) => offer.city.name === currentCity),
-    [allOffers, currentCity]
-  );
+  const dispatch = useDispatch<AppDispatch>();
+  
+  // Use memoized selectors
+  const currentCity = useSelector(selectCity);
+  const cityOffers = useSelector(selectCityOffers);
+  const isLoading = useSelector(selectOffersLoading);
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
+  const user = useSelector(selectUser);
+  const favoriteOffers = useSelector(selectFavoriteOffers);
 
   const sortedOffers = useMemo(() => {
     const offers = [...cityOffers];
@@ -41,65 +41,26 @@ function MainPage(): JSX.Element {
     }
   }, [cityOffers, currentSort]);
 
-  const handleCityChange = (city: string) => {
+  const handleCityChange = useCallback((city: string) => {
     dispatch(changeCity(city));
     setCurrentSort(SortType.Popular);
-  };
+  }, [dispatch]);
 
-  const handleSortChange = (sort: SortType) => {
+  const handleSortChange = useCallback((sort: SortType) => {
     setCurrentSort(sort);
-  };
+  }, []);
 
   return (
     <div className="page page--gray page--main">
       <header className="header">
         <div className="container">
           <div className="header__wrapper">
-            <div className="header__left">
-              <a className="header__logo-link header__logo-link--active" href="/">
-                <img
-                  className="header__logo"
-                  src="/img/logo.svg"
-                  alt="6 cities logo"
-                  width="81"
-                  height="41"
-                />
-              </a>
-            </div>
-            <nav className="header__nav">
-              <ul className="header__nav-list">
-                {authorizationStatus === AuthorizationStatus.Auth ? (
-                  <>
-                    <li className="header__nav-item user">
-                      <Link className="header__nav-link header__nav-link--profile" to="/favorites">
-                        <div className="header__avatar-wrapper user__avatar-wrapper">
-                          {user?.avatarUrl && (
-                            <img 
-                              src={user.avatarUrl} 
-                              alt="User avatar" 
-                              style={{ width: '100%', height: '100%', borderRadius: '50%' }}
-                            />
-                          )}
-                        </div>
-                        <span className="header__user-name user__name">{user?.email}</span>
-                        <span className="header__favorite-count">{allOffers.filter((o) => o.isFavorite).length}</span>
-                      </Link>
-                    </li>
-                    <li className="header__nav-item">
-                      <a className="header__nav-link" href="#">
-                        <span className="header__signout">Sign out</span>
-                      </a>
-                    </li>
-                  </>
-                ) : (
-                  <li className="header__nav-item">
-                    <Link className="header__nav-link" to="/login">
-                      <span className="header__login">Sign in</span>
-                    </Link>
-                  </li>
-                )}
-              </ul>
-            </nav>
+            <HeaderLogo isActive />
+            <HeaderNav 
+              authorizationStatus={authorizationStatus}
+              user={user}
+              favoriteCount={favoriteOffers.length}
+            />
           </div>
         </div>
       </header>

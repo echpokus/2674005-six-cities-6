@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
 import L, { Map as LeafletMap, Marker } from 'leaflet';
 import type { Offer } from '../../types/offer';
 
@@ -19,7 +19,7 @@ const activeIcon = L.icon({
   iconAnchor: [13.5, 39]
 });
 
-function Map({ offers, activeOfferId }: MapProps): JSX.Element {
+function MapComponent({ offers, activeOfferId }: MapProps): JSX.Element {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<LeafletMap | null>(null);
   const markersRef = useRef<Record<string, Marker>>({});
@@ -94,4 +94,5 @@ function Map({ offers, activeOfferId }: MapProps): JSX.Element {
   );
 }
 
+const Map = memo(MapComponent);
 export default Map;

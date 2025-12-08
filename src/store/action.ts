@@ -1,6 +1,3 @@
-import { createAction } from '@reduxjs/toolkit';
-import { AuthorizationStatus } from '../const';
-
-export const changeCity = createAction<string>('city/change');
-export const requireAuthorization = createAction<AuthorizationStatus>('user/requireAuthorization');
-export const clearCurrentOffer = createAction('offer/clear');
+export { changeCity } from './slices/offers-slice';
+export { requireAuthorization } from './slices/user-slice';
+export { clearCurrentOffer } from './slices/offer-details-slice';
