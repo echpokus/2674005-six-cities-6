@@ -50,8 +50,9 @@ function OfferCard({ offer, onMouseEnter, onMouseLeave }: OfferCardProps): JSX.E
         </div>
 
         <div className="place-card__rating rating">
-          <div className="place-card__stars rating__stars">
-            <span style={{ width: `${offer.rating * 20}%` }}></span>
+          <div className="place-card__stars rating__stars" style={{ position: 'relative', width: '73px', height: '12px' }}>
+            <img src="/img/stars.svg" alt="rating" style={{ position: 'absolute', top: 0, left: 0, width: '73px', height: '12px' }} />
+            <img src="/img/stars-active.svg" alt="active rating" style={{ position: 'absolute', top: 0, left: 0, width: '73px', height: '12px', clipPath: `inset(0 ${100 - offer.rating * 20}% 0 0)` }} />
           </div>
           <span className="visually-hidden">Rating</span>
         </div>

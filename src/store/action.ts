@@ -3,3 +3,4 @@ import { AuthorizationStatus } from '../const';
 
 export const changeCity = createAction<string>('city/change');
 export const requireAuthorization = createAction<AuthorizationStatus>('user/requireAuthorization');
+export const clearCurrentOffer = createAction('offer/clear');

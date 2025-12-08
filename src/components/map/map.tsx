@@ -40,6 +40,16 @@ function Map({ offers, activeOfferId }: MapProps): JSX.Element {
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(mapRef.current);
+    } else {
+      const center = offers[0].location;
+      mapRef.current.flyTo(
+        [center.latitude, center.longitude],
+        center.zoom,
+        {
+          duration: 1.5,
+          easeLinearity: 0.25
+        }
+      );
     }
 
     // Удаляем маркеры, которых нет в новом списке офферов

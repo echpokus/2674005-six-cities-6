@@ -3,6 +3,7 @@ import type { AxiosInstance } from 'axios';
 import { APIRoute } from '../const';
 import type { Offer } from '../types/offer';
 import type { User, AuthData } from '../types/user';
+import type { Comment, NewComment } from '../types/comment';
 
 const TOKEN_KEY = 'six-cities-token';
 
@@ -56,6 +57,72 @@ export const login = createAsyncThunk<
   async ({ email, password }, { extra: api }) => {
     const { data } = await api.post<User>(APIRoute.Login, { email, password });
     saveToken(data.token);
+    return data;
+  }
+);
+
+export const logout = createAsyncThunk<
+  void,
+  undefined,
+  { extra: AxiosInstance }
+>(
+  'user/logout',
+  async (_arg, { extra: api }) => {
+    await api.delete(APIRoute.Logout);
+    dropToken();
+  }
+);
+
+export const fetchOfferDetails = createAsyncThunk<
+  Offer,
+  string,
+  { extra: AxiosInstance }
+>(
+  'offer/fetchDetails',
+  async (offerId, { extra: api }) => {
+    const { data } = await api.get<Offer>(`${APIRoute.Offers}/${offerId}`);
+    return {
+      ...data,
+      image: data.previewImage
+    };
+  }
+);
+
+export const fetchNearbyOffers = createAsyncThunk<
+  Offer[],
+  string,
+  { extra: AxiosInstance }
+>(
+  'offer/fetchNearby',
+  async (offerId, { extra: api }) => {
+    const { data } = await api.get<Offer[]>(`${APIRoute.Offers}/${offerId}${APIRoute.Nearby}`);
+    return data.map((offer) => ({
+      ...offer,
+      image: offer.previewImage
+    }));
+  }
+);
+
+export const fetchComments = createAsyncThunk<
+  Comment[],
+  string,
+  { extra: AxiosInstance }
+>(
+  'offer/fetchComments',
+  async (offerId, { extra: api }) => {
+    const { data } = await api.get<Comment[]>(`${APIRoute.Comments}/${offerId}`);
+    return data;
+  }
+);
+
+export const postComment = createAsyncThunk<
+  Comment,
+  { offerId: string; comment: NewComment },
+  { extra: AxiosInstance }
+>(
+  'offer/postComment',
+  async ({ offerId, comment }, { extra: api }) => {
+    const { data } = await api.post<Comment>(`${APIRoute.Comments}/${offerId}`, comment);
     return data;
   }
 );
