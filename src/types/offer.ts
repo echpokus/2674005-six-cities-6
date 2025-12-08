@@ -9,6 +9,12 @@ export type City = {
   location: Location;
 };
 
+export type Host = {
+  name: string;
+  avatarUrl: string;
+  isPro: boolean;
+};
+
 export type Offer = {
   id: string;
   title: string;
@@ -21,4 +27,10 @@ export type Offer = {
   isPremium: boolean;
   rating: number;
   image?: string; // For compatibility with components
+  images?: string[]; // Gallery images for detail page
+  goods?: string[]; // What's inside (amenities)
+  description?: string;
+  bedrooms?: number;
+  maxAdults?: number;
+  host?: Host;
 };

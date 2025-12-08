@@ -47,16 +47,24 @@ body {
 
 .locations__item-link:hover {
   color: #4481c3 !important;
+  text-shadow: none !important;
+}
+
+.locations__item-link:hover span {
+  text-shadow: none !important;
 }
 
 .locations__item-link.tabs__item--active {
-  color: #4481c3 !important;
+  color: #fff !important;
+  background-color: #4481c3;
   border-color: #4481c3;
   font-weight: 700;
+  text-shadow: none !important;
 }
 
 .locations__item-link.tabs__item--active span {
-  color: #4481c3 !important;
+  color: #fff !important;
+  text-shadow: none !important;
 }
 
 .rating__stars::before,

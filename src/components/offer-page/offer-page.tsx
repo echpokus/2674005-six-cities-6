@@ -1,43 +1,46 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import type { RootState } from '../../store';
+import React, { useEffect } from 'react';
+import { useParams, Link, Navigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchOfferDetails, fetchNearbyOffers, fetchComments, logout } from '../../store/api-actions';
+import { clearCurrentOffer } from '../../store/action';
+import { AuthorizationStatus } from '../../const';
+import type { RootState, AppDispatch } from '../../store';
 import ReviewForm from '../review-form/review-form';
+import Spinner from '../spinner/spinner';
 
 function OfferPage(): JSX.Element {
   const { id } = useParams();
-  const offers = useSelector((state: RootState) => state.offers);
-  const offer = offers.find((item) => item.id === id);
+  const dispatch = useDispatch<AppDispatch>();
+  
+  const offer = useSelector((state: RootState) => state.currentOffer);
+  const comments = useSelector((state: RootState) => state.comments);
+  const isOfferLoading = useSelector((state: RootState) => state.isOfferLoading);
+  const hasOfferError = useSelector((state: RootState) => state.hasOfferError);
+  const authorizationStatus = useSelector((state: RootState) => state.authorizationStatus);
+  const user = useSelector((state: RootState) => state.user);
+  const allOffers = useSelector((state: RootState) => state.offers);
 
-  if (!offer) {
-    return (
-      <div className="page page--gray page--offer">
-        <header className="header">
-          <div className="container">
-            <div className="header__wrapper">
-              <div className="header__left">
-                <Link className="header__logo-link" to="/">
-                  <img
-                    className="header__logo"
-                    src="/img/logo.svg"
-                    alt="6 cities logo"
-                    width="81"
-                    height="41"
-                  />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </header>
+  const handleLogout = () => {
+    dispatch(logout());
+  };
 
-        <main className="page__main page__main--offer">
-          <div className="container">
-            <h1>Offer not found</h1>
-            <Link to="/">Go to main page</Link>
-          </div>
-        </main>
-      </div>
-    );
+  useEffect(() => {
+    if (id) {
+      if (offer?.id !== id) {
+        dispatch(clearCurrentOffer());
+      }
+      dispatch(fetchOfferDetails(id));
+      dispatch(fetchNearbyOffers(id));
+      dispatch(fetchComments(id));
+    }
+  }, [dispatch, id, offer?.id]);
+
+  if (hasOfferError) {
+    return <Navigate to="/404" />;
+  }
+
+  if (isOfferLoading || !offer) {
+    return <Spinner />;
   }
 
   return (
@@ -59,20 +62,36 @@ function OfferPage(): JSX.Element {
 
             <nav className="header__nav">
               <ul className="header__nav-list">
-                <li className="header__nav-item user">
-                  <a className="header__nav-link header__nav-link--profile" href="#todo">
-                    <div className="header__avatar-wrapper user__avatar-wrapper" />
-                    <span className="header__user-name user__name">
-                      Oliver.conner@gmail.com
-                    </span>
-                    <span className="header__favorite-count">3</span>
-                  </a>
-                </li>
-                <li className="header__nav-item">
-                  <a className="header__nav-link" href="#todo">
-                    <span className="header__signout">Sign out</span>
-                  </a>
-                </li>
+                {authorizationStatus === AuthorizationStatus.Auth ? (
+                  <>
+                    <li className="header__nav-item user">
+                      <Link className="header__nav-link header__nav-link--profile" to="/favorites">
+                        <div className="header__avatar-wrapper user__avatar-wrapper">
+                          {user?.avatarUrl && (
+                            <img 
+                              src={user.avatarUrl} 
+                              alt="User avatar" 
+                              style={{ width: '100%', height: '100%', borderRadius: '50%' }}
+                            />
+                          )}
+                        </div>
+                        <span className="header__user-name user__name">{user?.email}</span>
+                        <span className="header__favorite-count">{allOffers.filter((o) => o.isFavorite).length}</span>
+                      </Link>
+                    </li>
+                    <li className="header__nav-item">
+                      <a className="header__nav-link" href="#" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
+                        <span className="header__signout">Sign out</span>
+                      </a>
+                    </li>
+                  </>
+                ) : (
+                  <li className="header__nav-item">
+                    <Link className="header__nav-link" to="/login">
+                      <span className="header__login">Sign in</span>
+                    </Link>
+                  </li>
+                )}
               </ul>
             </nav>
           </div>
@@ -83,13 +102,15 @@ function OfferPage(): JSX.Element {
         <section className="offer">
           <div className="offer__gallery-container container">
             <div className="offer__gallery">
-              <div className="offer__image-wrapper">
-                <img
-                  className="offer__image"
-                  src={offer.previewImage}
-                  alt={offer.title}
-                />
-              </div>
+              {offer.images?.slice(0, 6).map((imageUrl, index) => (
+                <div key={imageUrl + index} className="offer__image-wrapper">
+                  <img
+                    className="offer__image"
+                    src={imageUrl}
+                    alt={offer.title}
+                  />
+                </div>
+              ))}
             </div>
           </div>
 
@@ -106,8 +127,9 @@ function OfferPage(): JSX.Element {
               </div>
 
               <div className="offer__rating rating">
-                <div className="offer__stars rating__stars">
-                  <span style={{ width: `${offer.rating * 20}%` }}></span>
+                <div className="offer__stars rating__stars" style={{ position: 'relative', width: '73px', height: '12px' }}>
+                  <img src="/img/stars.svg" alt="rating" style={{ position: 'absolute', top: 0, left: 0, width: '73px', height: '12px' }} />
+                  <img src="/img/stars-active.svg" alt="active rating" style={{ position: 'absolute', top: 0, left: 0, width: '73px', height: '12px', clipPath: `inset(0 ${100 - offer.rating * 20}% 0 0)` }} />
                 </div>
                 <span className="visually-hidden">Rating</span>
                 <span className="offer__rating-value rating__value">
@@ -119,12 +141,16 @@ function OfferPage(): JSX.Element {
                 <li className="offer__feature offer__feature--entire">
                   {offer.type}
                 </li>
-                <li className="offer__feature offer__feature--bedrooms">
-                  3 Bedrooms
-                </li>
-                <li className="offer__feature offer__feature--adults">
-                  Max 4 adults
-                </li>
+                {offer.bedrooms && (
+                  <li className="offer__feature offer__feature--bedrooms">
+                    {offer.bedrooms} Bedrooms
+                  </li>
+                )}
+                {offer.maxAdults && (
+                  <li className="offer__feature offer__feature--adults">
+                    Max {offer.maxAdults} adults
+                  </li>
+                )}
               </ul>
 
               <div className="offer__price">
@@ -132,32 +158,77 @@ function OfferPage(): JSX.Element {
                 <span className="offer__price-text">&nbsp;night</span>
               </div>
 
-              <div className="offer__inside" />
+              {offer.goods && offer.goods.length > 0 && (
+                <div className="offer__inside">
+                  <h2 className="offer__inside-title">What&apos;s inside</h2>
+                  <ul className="offer__inside-list">
+                    {offer.goods.map((good) => (
+                      <li key={good} className="offer__inside-item">
+                        {good}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               <div className="offer__host">
-                <h2 className="offer__host-title" />
+                <h2 className="offer__host-title">Meet the host</h2>
                 <div className="offer__host-user user">
-                  <div className="offer__avatar-wrapper offer__avatar-wrapper--pro user__avatar-wrapper">
+                  <div className={`offer__avatar-wrapper ${offer.host?.isPro ? 'offer__avatar-wrapper--pro' : ''} user__avatar-wrapper`}>
                     <img
                       className="offer__avatar user__avatar"
-                      src="/img/avatar-angelina.jpg"
+                      src={offer.host?.avatarUrl || '/img/avatar-angelina.jpg'}
                       width="74"
                       height="74"
                       alt="Host avatar"
                     />
                   </div>
-                  <span className="offer__user-name">Angelina</span>
-                  <span className="offer__user-status">Pro</span>
+                  <span className="offer__user-name">{offer.host?.name || 'Host'}</span>
+                  {offer.host?.isPro && <span className="offer__user-status">Pro</span>}
                 </div>
-                <div className="offer__description" />
+                {offer.description && (
+                  <div className="offer__description">
+                    <p className="offer__text">{offer.description}</p>
+                  </div>
+                )}
               </div>
 
               <section className="offer__reviews reviews">
                 <h2 className="reviews__title">
-                  <span className="reviews__amount">0</span>
+                  Reviews · <span className="reviews__amount">{comments.length}</span>
                 </h2>
-                <ul className="reviews__list" />
-                <ReviewForm />
+                <ul className="reviews__list">
+                  {comments.map((comment) => (
+                    <li key={comment.id} className="reviews__item">
+                      <div className="reviews__user user">
+                        <div className="reviews__avatar-wrapper user__avatar-wrapper">
+                          <img
+                            className="reviews__avatar user__avatar"
+                            src={comment.user.avatarUrl}
+                            width="54"
+                            height="54"
+                            alt="Reviews avatar"
+                          />
+                        </div>
+                        <span className="reviews__user-name">{comment.user.name}</span>
+                      </div>
+                      <div className="reviews__info">
+                        <div className="reviews__rating rating">
+                          <div className="reviews__stars rating__stars" style={{ position: 'relative', width: '73px', height: '12px' }}>
+                            <img src="/img/stars.svg" alt="rating" style={{ position: 'absolute', top: 0, left: 0, width: '73px', height: '12px' }} />
+                            <img src="/img/stars-active.svg" alt="active rating" style={{ position: 'absolute', top: 0, left: 0, width: '73px', height: '12px', clipPath: `inset(0 ${100 - comment.rating * 20}% 0 0)` }} />
+                          </div>
+                          <span className="visually-hidden">Rating</span>
+                        </div>
+                        <p className="reviews__text">{comment.comment}</p>
+                        <time className="reviews__time" dateTime={comment.date}>
+                          {new Date(comment.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
+                        </time>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                {authorizationStatus === AuthorizationStatus.Auth && <ReviewForm offerId={id!} />}
               </section>
             </div>
           </div>
