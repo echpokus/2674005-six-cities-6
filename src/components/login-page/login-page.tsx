@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../../store/api-actions';
 import { AuthorizationStatus } from '../../const';
 import type { RootState, AppDispatch } from '../../store';
+import { selectAuthorizationStatus } from '../../store/selectors/user-selectors';
 
 function LoginPage(): JSX.Element {
   const [email, setEmail] = useState('');
@@ -11,7 +12,7 @@ function LoginPage(): JSX.Element {
   const [error, setError] = useState('');
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const authorizationStatus = useSelector((state: RootState) => state.authorizationStatus);
+  const authorizationStatus = useSelector(selectAuthorizationStatus);
 
   useEffect(() => {
     if (authorizationStatus === AuthorizationStatus.Auth) {
