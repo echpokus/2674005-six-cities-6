@@ -2,20 +2,29 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import { configureMockStore } from '@jedmao/redux-mock-store';
+import { configureStore } from '@reduxjs/toolkit';
 import { AuthorizationStatus } from '../../const';
+import { userSlice } from '../../store/slices/user-slice';
+import { offersSlice } from '../../store/slices/offers-slice';
+import { offerDetailsSlice } from '../../store/slices/offer-details-slice';
 import MainPage from '../main-page/main-page';
 import LoginPage from '../login-page/login-page';
 import FavoritesPage from '../favorites-page/favorites-page';
-import OfferPage from '../offer-page/offer-page';
 import NotFoundPage from '../not-found-page/not-found-page';
 import PrivateRoute from '../private-route/private-route';
 
-const mockStore = configureMockStore();
+const createMockStore = (initialState: any) => configureStore({
+  reducer: {
+    user: userSlice.reducer,
+    offers: offersSlice.reducer,
+    offerDetails: offerDetailsSlice.reducer
+  },
+  preloadedState: initialState
+});
 
 describe('App Routing', () => {
   it('should render MainPage when navigating to "/"', () => {
-    const store = mockStore({
+    const store = createMockStore({
       offers: {
         city: 'Paris',
         offers: [],
@@ -50,7 +59,7 @@ describe('App Routing', () => {
   });
 
   it('should render LoginPage when navigating to "/login"', () => {
-    const store = mockStore({
+    const store = createMockStore({
       offers: {
         city: 'Paris',
         offers: [],
@@ -85,7 +94,7 @@ describe('App Routing', () => {
   });
 
   it('should render NotFoundPage when navigating to "/404"', () => {
-    const store = mockStore({
+    const store = createMockStore({
       offers: {
         city: 'Paris',
         offers: [],
@@ -122,7 +131,7 @@ describe('App Routing', () => {
   });
 
   it('should render NotFoundPage for unknown routes', () => {
-    const store = mockStore({
+    const store = createMockStore({
       offers: {
         city: 'Paris',
         offers: [],
@@ -157,7 +166,7 @@ describe('App Routing', () => {
   });
 
   it('should redirect to "/login" when accessing "/favorites" without authorization', () => {
-    const store = mockStore({
+    const store = createMockStore({
       offers: {
         city: 'Paris',
         offers: [],
@@ -200,7 +209,7 @@ describe('App Routing', () => {
   });
 
   it('should render FavoritesPage when accessing "/favorites" with authorization', () => {
-    const store = mockStore({
+    const store = createMockStore({
       offers: {
         city: 'Paris',
         offers: [],

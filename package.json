@@ -10,7 +10,6 @@
     "lint": "eslint --ext .ts,.tsx src"
   },
   "devDependencies": {
-    "@jedmao/redux-mock-store": "^3.0.5",
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^14.1.2",
     "@testing-library/user-event": "^14.5.1",
@@ -28,7 +27,6 @@
     "jsdom": "^23.0.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "redux-thunk": "^3.1.0",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.6.2",
