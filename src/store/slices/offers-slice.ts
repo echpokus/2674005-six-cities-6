@@ -5,19 +5,19 @@ import type { Offer } from '../../types/offer';
 type OffersState = {
   city: string;
   offers: Offer[];
-  isLoading: boolean;
-  hasError: boolean;
   favorites: Offer[];
+  isLoading: boolean;
   isFavoritesLoading: boolean;
+  hasError: boolean;
 };
 
 const initialState: OffersState = {
   city: 'Paris',
   offers: [],
-  isLoading: false,
-  hasError: false,
   favorites: [],
-  isFavoritesLoading: false
+  isLoading: false,
+  isFavoritesLoading: false,
+  hasError: false
 };
 
 export const offersSlice = createSlice({
