@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { Provider } from 'react-redux';
@@ -13,6 +13,49 @@ import FavoritesPage from '../favorites-page/favorites-page';
 import NotFoundPage from '../not-found-page/not-found-page';
 import PrivateRoute from '../private-route/private-route';
 import type { RootState } from '../../store';
+import type { Offer } from '../../types/offer';
+
+// Mock api-actions to prevent side effects
+vi.mock('../../store/api-actions', async () => {
+  const actual = await vi.importActual('../../store/api-actions');
+  const mockFetchFavorites = Object.assign(
+    vi.fn(() => ({ type: 'mock/fetchFavorites' })),
+    {
+      pending: { type: 'mock/fetchFavorites/pending', toString: () => 'mock/fetchFavorites/pending' },
+      fulfilled: { type: 'mock/fetchFavorites/fulfilled', toString: () => 'mock/fetchFavorites/fulfilled' },
+      rejected: { type: 'mock/fetchFavorites/rejected', toString: () => 'mock/fetchFavorites/rejected' }
+    }
+  );
+  
+  return {
+    ...actual,
+    fetchFavorites: mockFetchFavorites,
+  };
+});
+
+const mockOffer: Offer = {
+  id: '1',
+  title: 'Beautiful apartment',
+  type: 'apartment',
+  price: 120,
+  previewImage: 'img/apartment-01.jpg',
+  city: {
+    name: 'Paris',
+    location: {
+      latitude: 48.85661,
+      longitude: 2.35222,
+      zoom: 10
+    }
+  },
+  location: {
+    latitude: 48.85661,
+    longitude: 2.35222,
+    zoom: 10
+  },
+  isFavorite: true,
+  isPremium: false,
+  rating: 4.8
+};
 
 const createMockStore = (initialState: Partial<RootState>) => configureStore({
   reducer: {
@@ -28,7 +71,7 @@ describe('App Routing', () => {
     const store = createMockStore({
       offers: {
         city: 'Paris',
-        offers: [],
+        offers: [mockOffer],
         favorites: [],
         isLoading: false,
         isFavoritesLoading: false,
@@ -224,7 +267,7 @@ describe('App Routing', () => {
       offers: {
         city: 'Paris',
         offers: [],
-        favorites: [],
+        favorites: [mockOffer],
         isLoading: false,
         isFavoritesLoading: false,
         hasError: false
@@ -266,6 +309,6 @@ describe('App Routing', () => {
       </Provider>
     );
 
-    expect(screen.getByRole('heading', { name: /Избранное/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Saved listing/i })).toBeInTheDocument();
   });
 });
