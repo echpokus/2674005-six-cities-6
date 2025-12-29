@@ -8,7 +8,7 @@ import { userSlice } from '../../store/slices/user-slice';
 import { offersSlice } from '../../store/slices/offers-slice';
 import { offerDetailsSlice } from '../../store/slices/offer-details-slice';
 import OfferPage from './offer-page';
-import type { FullOffer } from '../../types/offer';
+import type { Offer } from '../../types/offer';
 import type { Comment } from '../../types/comment';
 
 // Mock API actions
@@ -39,7 +39,7 @@ vi.mock('../../store/api-actions', async () => {
   };
 });
 
-const mockOffer: FullOffer = {
+const mockOffer: Offer = {
   id: '1',
   title: 'Beautiful apartment',
   type: 'apartment',
@@ -88,7 +88,7 @@ const mockComments: Comment[] = [
 ];
 
 const createMockStore = (
-  offer: FullOffer | null,
+  offer: Offer | null,
   comments: Comment[],
   isLoading: boolean,
   hasError: boolean,
